@@ -11,7 +11,7 @@ if ($conn->connect_error){
 	die("Connection Failed: " . $conn->connect_error);
 }
 
-$sql = "SELECT comments FROM sweetwater_test";
+$sql = "SELECT comments, orderid FROM sweetwater_test";
 $result = $conn->query($sql);
 
 $candy_comments = array();
@@ -19,6 +19,7 @@ $call_comments = array();
 $refer_comments = array();
 $sign_comments = array();
 $misc_comments = array();
+$date_arr = array();
 
 if ($result->num_rows > 0) {
   // output data of each row
@@ -38,6 +39,18 @@ if ($result->num_rows > 0) {
   	}
   	else{
   		array_push($misc_comments, "$row[comments]");
+  	}
+  	if (strpos("$row[comments]", "Expected Ship Date: ") !== false){ //20 chars
+  		$posstart = strpos("$row[comments]", "Expected Ship Date: ") + 20;
+  		$shipdate = substr("$row[comments]", $posstart, 8);
+  		$myd = DateTime::createFromFormat('m/d/y', $shipdate)->format('Y-m-d');
+  		echo $myd . "<br>";
+  		array_push($date_arr, $shipdate);
+  		$update = "UPDATE sweetwater_test SET shipdate_expected='$myd' WHERE orderid='$row[orderid]'";
+
+  		if ($conn->query($update) !== true){
+  			echo "Error updating database." . "<br>";
+  		}
   	}
   }
 } else {
@@ -96,6 +109,15 @@ $conn->close();
 	<?php
 	foreach($misc_comments as $misc_comment){
 		echo("<li>" . $misc_comment . "</li>");
+	}
+	?>
+
+</ul>
+<h2>Dates?</h2>
+<ul>
+	<?php
+	foreach($date_arr as $date){
+		echo("<li>" . $date . "</li>");
 	}
 	?>
 
