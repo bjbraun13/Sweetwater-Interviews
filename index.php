@@ -26,14 +26,16 @@ if ($result->num_rows > 0) {
   while($row = $result->fetch_assoc()) {
   	//Group comments based on contents
   	$lower_comment = strtolower("$row[comments]");  //not case sensitive
+  	$candy_pattern = "/candy|smarties|taffy|reese(')*s|kit(\s)*kat/i";
+  	$call_pattern = "/\bcall(s*)\b|comunicarse|llámame/i";
 
   	//Candy group
-  	if ((strpos($lower_comment, "candy") !== false) || (strpos($lower_comment, "smarties") !== false) || (strpos($lower_comment, "taffy") !== false)){
+  	if (preg_match($candy_pattern, $lower_comment)){
   		array_push($candy_comments, "$row[comments]");
   	}
 
   	//Call group
-  	else if (((strpos($lower_comment, "call") !== false) || (strpos($lower_comment, "comunicarse") !== false) || (strpos($lower_comment, "llámame") !== false)) && (strpos($lower_comment, "automatically") === false)){
+  	else if (preg_match($call_pattern, $lower_comment)){
   		array_push($call_comments, "$row[comments]");
   	}
 
